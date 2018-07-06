@@ -1,20 +1,29 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const contact = new Schema({
+    email:  String,
+    fullname: String,
+    message:   String,
+    fone: Number,
+    data: Date
+});
 
-var ulr2 = "mongodb+srv://silvano:SIL9876vano@cluster0-zlonj.mongodb.net/nodejs-restapi?retryWrites=true";
 var url = "mongodb://silvano:SIL9876vano@cluster0-shard-00-00-zlonj.mongodb.net:27017,cluster0-shard-00-01-zlonj.mongodb.net:27017,cluster0-shard-00-02-zlonj.mongodb.net:27017/nodejs-restapi?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true";
-var uri = "mongodb://test:123456abc@cluster0-shard-00-00-zlonj.mongodb.net:27017,cluster0-shard-00-01-zlonj.mongodb.net:27017,cluster0-shard-00-02-zlonj.mongodb.net:27017/nodejs-restapi?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true";
 
 //Set up default mongoose connection
-var mongoDB = uri;
 mongoose.connect(url, function(error, db){
     if(error){
         console.log('MongoDB connection error:');
     } else {
         var contact = db.collection('Contact').find();
-        
+        contact.each(function(err, doc) {
+            console.log(doc);    
+        });
+
         /* 
 
         Ref:. https://www.guru99.com/node-js-mongodb.html
+        Ref mongoose:. http://mongoosejs.com/docs/guide.html
 
         //insert
         db.collection('Contact').insertOne({
@@ -38,9 +47,7 @@ mongoose.connect(url, function(error, db){
         );
         */
 
-        contact.each(function(err, doc) {
-            console.log(doc);    
-        });
+        
     }
 });
 
