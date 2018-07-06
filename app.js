@@ -1,6 +1,4 @@
-//var MongoClient = require('mongodb').MongoClient;
 const mongoose = require('mongoose');
-
 
 var ulr2 = "mongodb+srv://silvano:SIL9876vano@cluster0-zlonj.mongodb.net/nodejs-restapi?retryWrites=true";
 var url = "mongodb://silvano:SIL9876vano@cluster0-shard-00-00-zlonj.mongodb.net:27017,cluster0-shard-00-01-zlonj.mongodb.net:27017,cluster0-shard-00-02-zlonj.mongodb.net:27017/nodejs-restapi?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true";
@@ -15,6 +13,9 @@ mongoose.connect(url, function(error, db){
         var contact = db.collection('Contact').find();
         
         /* 
+
+        Ref:. https://www.guru99.com/node-js-mongodb.html
+
         //insert
         db.collection('Contact').insertOne({
             nome: "teste1",
@@ -36,6 +37,7 @@ mongoose.connect(url, function(error, db){
             }    
         );
         */
+
         contact.each(function(err, doc) {
             console.log(doc);    
         });
