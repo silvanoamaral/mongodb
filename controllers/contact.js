@@ -4,7 +4,7 @@ let str = '';
 
 module.exports = function(app) {
 
-    //app.get('/pagamentos/', function(req, res) {
+    //app.get('/contact/', function(req, res) {
        // res.send('Hello World! - Recebida requisição de teste na porta 8000.');        
     //});
 
@@ -14,20 +14,58 @@ module.exports = function(app) {
                 console.log('MongoDB connection error:');
                 res.status(500).send(error);
             } else {
-                var contact = db.collection('Contact').find();
+                var contact = db.collection('Contact').find();                
                 contact.each(function(err, item) {
                     if(item != null) {
-                        str += 'Nome: '+ item.nome +' e-mail: '+ item.email +'</br>';
+                        str += 'ID:. ' + item._id +' Nome: '+ item.nome +' e-mail: '+ item.email +'</br>';
                     }
                 });
             }
 
             res.send(str);
-            db.close();
+            db.close();            
         });
 
         //res.send('Hello World! - Recebida requisição de teste na porta 8000.');
-    });    
+    }); 
+    
+    app.post('/contact/contact', function (req, res) {
+        /*
+        req.assert("nome", "Nome é obrigatório").notEmpty();
+
+        req.assert("email", "E-mail é obrigatório.").notEmpty().isFloat();
+
+        var erros = req.validationErrors();
+
+        if(erros) {
+            console.log('Erros de validação encontrados');
+            res.status(400).send(erros);
+            return;
+        }
+        */
+        var contact = req.body;
+        console.log('Processando uma requisição de um novo contact.');
+        
+        contact.status = 'Criado';
+        contact.data = new Date;
+
+        res.status(201).json(contact);
+
+        mongoose.connect(url, function(error, db){
+            if(error) {
+                console.log('MongoDB connection error:');
+                res.status(500).send(error);
+            } else {
+                //db.collection('Contact').insertOne({
+                   // nome: "teste1",
+                   // email: "teste1@gmail.com"
+                //});
+            }
+
+            res.send(str);
+            db.close();            
+        });
+    });
 }
 
 /*
