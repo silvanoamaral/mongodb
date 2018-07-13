@@ -1,39 +1,49 @@
 const mongoose = require('mongoose');
 var url = "mongodb://silvano:SIL9876vano@cluster0-shard-00-00-zlonj.mongodb.net:27017,cluster0-shard-00-01-zlonj.mongodb.net:27017,cluster0-shard-00-02-zlonj.mongodb.net:27017/nodejs-restapi?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true";
-let str = '';
+
 
 module.exports = function(app) {
 
     //app.get('/contact/', function(req, res) {
        // res.send('Hello World! - Recebida requisição de teste na porta 8000.');        
     //});
+    let str = '',
+    contact = '';
 
-    app.get('/contact', function (req, res) {
-        mongoose.connect(url, function(error, db){
+    app.get('/contact', function (req, res) {      
+        mongoose.connect(url, function(error, db) {
             if(error) {
                 console.log('MongoDB connection error:');
                 res.status(500).send(error);
             } else {
-                var contact = db.collection('Contact').find();                
+                contact = db.collection('Contact').find();                
                 contact.each(function(err, item) {
+                    //console.log(item);
                     if(item != null) {
                         str += 'ID:. ' + item._id +' Nome: '+ item.nome +' e-mail: '+ item.email +'</br>';
                     }
                 });
             }
 
-            res.send(str);
-            db.close();            
+            //res.send(str);
+            res.status(201).send(str);
+            db.close();
+            str = '';          
         });
 
         //res.send('Hello World! - Recebida requisição de teste na porta 8000.');
     }); 
+
+    app.locals.messages = [
+        { id: '400', message: 'Erros de validação encontrados' },
+        { id: '201', message: 'Goodbye World' }
+    ];
     
     app.post('/contact/contact', function (req, res) {
-        /*
+        
         req.assert("nome", "Nome é obrigatório").notEmpty();
 
-        req.assert("email", "E-mail é obrigatório.").notEmpty().isFloat();
+        req.assert("email", "E-mail é obrigatório.").notEmpty();
 
         var erros = req.validationErrors();
 
@@ -42,27 +52,75 @@ module.exports = function(app) {
             res.status(400).send(erros);
             return;
         }
-        */
-        var contact = req.body;
-        console.log('Processando uma requisição de um novo contact.');
         
-        contact.status = 'Criado';
-        contact.data = new Date;
+        console.log('Processando uma requisição de um novo contact.');
 
-        res.status(201).json(contact);
+        const body = req.body;
 
         mongoose.connect(url, function(error, db){
             if(error) {
                 console.log('MongoDB connection error:');
                 res.status(500).send(error);
-            } else {
-                //db.collection('Contact').insertOne({
-                   // nome: "teste1",
-                   // email: "teste1@gmail.com"
-                //});
+            } else {                
+                if (req.method === 'POST') {
+                    db.collection('Contact').insertOne({
+                        status  : 'Criado',
+                        data    : new Date,
+                        nome    : body.nome,
+                        email   : body.email
+                    });
+                }
             }
 
-            res.send(str);
+            //res.send(contact);
+            const messages = app.locals.messages;
+            res.status(201).json(messages);
+            db.close();            
+        });
+        
+        /*
+        if (req.method === 'POST') {
+            let contact = req.body;
+            contact.status = 'Criado';
+            contact.data = new Date;       
+            
+            console.log(contact);
+            //console.log('body: ' + JSON.stringify(req.body));
+        }  */      
+    });
+
+    app.put('/contact/contact/:id', function(req, res) {
+        mongoose.connect(url, function(error, db) {
+            if(error) {
+                console.log('MongoDB connection error:');
+                res.status(500).send(error);
+            } else {
+                //update
+                const headers = req.headers;
+
+                console.log(req.params.id, headers.novo);
+                
+                const ObjectID = require('mongodb').ObjectID;
+
+                try {
+                    db.collection('Contact').updateOne(
+                        { 
+                            _id : ObjectID(req.params.id)
+                        }, 
+                        {
+                        $set: {
+                            nome: headers.novo,
+                            //email: "p.maier@example.com"
+                        }
+                    });
+                } catch (e) {
+                    print(e);
+                }                
+            }
+
+            //res.send(contact);
+            const messages = app.locals.messages;
+            res.status(201).json(' document(s) updated');
             db.close();            
         });
     });
